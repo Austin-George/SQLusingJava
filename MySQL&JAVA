@@ -1,0 +1,138 @@
+import java.util.*;
+import java.sql.*;
+import java.util.logging.*;
+
+public class MoviesDatabase
+{
+	Connection con;
+	Statement stmt;
+	ResultSet rs;
+	int record=0;
+	void createConnection()
+	{
+		try
+		{
+			Class.forName("com.mysql.jdbc.Driver");
+			con = DriverManager.getConnection("jdbc:mysql://localhost:3306","root","root");
+			System.out.println("database Connection Successfull");
+		}
+		catch(Exception ex)
+		{
+			System.out.println(ex);
+		}
+	}
+	void createDatabase()
+	{
+		try
+		{
+			stmt = con.createStatement();
+			String sql="create schema moviesdatabase";
+			stmt.executeUpdate(sql);
+			System.out.println("moviesdatabase created successfully");
+		}
+		catch(Exception ex)
+		{
+			System.out.println(ex);
+		}
+	}
+	void createTable()
+	{
+		try
+		{
+			con=DriverManager.getConnection("jdbc:mysql://localhost:3306/moviesdatabase","root","root");
+			stmt=con.createStatement();
+			stmt.executeUpdate("CREATE TABLE MOVIES (SLNO INTEGER not NULL, NAME VARCHAR(100), ACTOR VARCHAR(50), ACTRESS VARCHAR(50), DIRECTOR VARCHAR(50), YEAR INTEGER,PRIMARY KEY(SLNO))");
+			System.out.println("Table MOVIES created successfully");
+		}
+		catch(Exception ex)
+		{
+			System.out.println(ex);
+		}
+	}
+	void readRecord(String name,String actor,String actress,String director,int year)
+	{
+		record++;
+		try
+		{
+			stmt.executeUpdate("INSERT INTO MOVIES VALUES ("+record+",'"+name+"','"+actor+"','"+actress+"','"+director+"',"+year+")");
+		}
+		catch(Exception ex)
+		{
+			System.out.println(ex);
+		}
+	}
+	void executeQueryOne()
+	{
+		try
+		{
+			rs = stmt.executeQuery("SELECT * FROM MOVIES");
+			while(rs.next())
+			{
+				System.out.println(rs.getString(1)+"\t"+rs.getString(2)+"\t"+rs.getString(3)+"\t"+rs.getString(4)+"\t"+rs.getString(5)+"\t"+rs.getString(6));
+			}
+		}
+		catch(Exception ex)
+		{
+			System.out.println(ex);
+		}
+	}
+	void executeQueryTwo(String name)
+	{
+		try
+		{
+			rs = stmt.executeQuery("SELECT * FROM MOVIES WHERE actor=\""+name+"\"");
+			while(rs.next())
+				System.out.println(rs.getString(1)+"\t"+rs.getString(2)+"\t"+rs.getString(3)+"\t"+rs.getString(4)+"\t"+rs.getString(5)+"\t"+rs.getString(6));
+		}
+		catch(Exception ex)
+		{
+			System.out.println(ex);
+		}
+	}
+	public static void main(String args[])
+	{
+		MoviesDatabase db = new MoviesDatabase();
+		db.createConnection();
+		db.createDatabase();
+		db.createTable();
+		System.out.println("1.Enter Record\n2.Execute Query One\n3.Execute Query two\n");
+		Scanner in = new Scanner(System.in);
+		int ch=1;
+		while(ch==1 || ch==2 || ch==3)
+		{
+			System.out.println("Enter choice");
+			ch=in.nextInt();
+			switch(ch)
+			{
+			case 1:
+				System.out.println("Enter Name,Actor,Actress,Director,Year of the movie");
+				String name=in.next();
+				String actor=in.next();
+				String actress=in.next();
+				String director=in.next();
+				int year=in.nextInt();
+				db.readRecord(name,actor,actress,director,year);
+				break;
+			case 2:
+				db.executeQueryOne();
+				break;
+			case 3:
+				System.out.println("Enter the Actor's name");
+				String str=in.next();
+				db.executeQueryTwo(str);
+				break;
+			default:
+				System.out.println("Thank You For Using Database");
+			}
+		}
+		try
+		{
+		db.con.close();
+		}
+		catch(SQLException ex)
+		{
+			System.out.println(ex);
+		}
+		in.close();
+	}
+}
